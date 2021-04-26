@@ -9,21 +9,15 @@ library(sf)
 library(raster)
 
 # paths
-GISlib  <- "E:/GIS_SensorStratification/GIS/"
+GISlib  <- GISlib
 
 # import data
-ETRrast <- raster(paste(GISlib,"ETRzip/ETRzip.gri",sep=""))
+ETRrast <- raster(paste(GISlib,"ETRzip.gri",sep=""))
 
 stdcrs <- crs(ETRrast)
 
-# Import and transform trails and roads (for mapping only)
-trails <- st_read(paste(GISlib,"GRSM_TRAILS/GRSM_TRAILS.shp",sep=""))
-roads  <- st_read(paste(GISlib,"GRSM_ROAD_CENTERLINES/GRSM_ROAD_CENTERLINES.shp",sep=""))
-trails <- st_transform(trails,stdcrs)
-roads  <- st_transform(roads,stdcrs)
-
 # Import and transform watershed data amd buffer
-allbuffer  <- st_read(paste(GISlib,"SampleBufferFeb2020_3/SampleBufferFeb2020_3.shp",sep=""))
+allbuffer  <- st_read(paste(GISlib,"SampleBuffer/SampleBuffer.shp",sep=""))
 watersheds <- st_read(paste(GISlib,"GRSM_WATERSHEDS/GRSM_WATERSHEDS.shp",sep=""))
 BigCr      <- st_union(watersheds[watersheds$Name=="Big Creek" & watersheds$States=="NC",])
 
@@ -129,43 +123,6 @@ finalsites <- rbind(BigCr_include1,BigCr_include2,BigCr_include3)
 finalsites$ETR <- factor(finalsites$ETR)
 
 st_write(finalsites,paste(GISlib,"BigCr_SampleSites",sep=""),driver="ESRI Shapefile")
-write.csv(finalsites,"E:/GIS_SensorStratification/BigCr_SampleSites.csv")
-
-
-
-#### plotting ####
-library(tmap)
-library(tmaptools)
-
-tmap_mode("view")
-
-tm_shape(BigCr,is.master=T) +
-  tm_polygons(alpha=0.1,border.col="blue") +
-tm_shape(finalsites) +
-  tm_dots(col="ETR",size=0.2,id="ptID") +
-tm_shape(trails) +
-  tm_lines(col="black",lty=2,id="TRAILNAME") +
-tm_shape(roads) +
-  tm_lines(col="red",id="RDLABEL") 
-
-
-tm_shape(BigCr_ETR)+
-  tm_raster(style="cat",palette="Set3",stretch.palette=F)
-
-
-
-
-tm_shape(trails) +
-  tm_lines(col="black",lty=2,id="TRAILNAME") +
-tm_shape(roads) +
-  tm_lines(col="red",id="RDLABEL") +
-tm_shape(EVI_Area) +
-  tm_raster(n=5) +
-tm_shape(BigCr) +
-  tm_polygons(alpha=0.4,border.col="blue") +
-tm_shape(parkbound) +
-  tm_polygons(alpha=0.05,border.col="blue")
-
-
+write.csv(finalsites,paste(out_path,"BigCr_SampleSites.csv",sep=""),row.names=F)
 
 

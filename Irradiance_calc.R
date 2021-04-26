@@ -3,8 +3,7 @@
 # Dec 2019
 
 
-gispath = gispath
-intermediatepath = intermediatepath
+GISlib = GISlib
 
 # packages
 library(raster)
@@ -13,13 +12,13 @@ library(rgeos)
 library(solartime)
 
 # import and crop DEM
-elev <- raster(paste(gispath,"dem10",sep=""))
+elev <- raster(paste(GISlib,"Elevation/elev.gri",sep=""))
 stdcrs <- crs(proj4string(elev))
 
 DEM <- aggregate(elev,fact=3) #30m scale for 1st batch of models
 names(DEM) <- "DEM"
-DEM <- crop(DEM,extent(225982,317052,3921251,3964481)) #strdist extent + 2km
 
+rm(list=setdiff(ls(), c("DEM","stdcrs","sensor_buffer")))
 
 # calculate slope and aspect in degrees and radians
 slope <- terrain(DEM,opt="slope",unit="degrees")
@@ -66,5 +65,19 @@ for(i in 1:365){
     tempstack <- stack(tempstack,hour_rast)
   }
   dailysum <- sum(tempstack,na.rm=T)/2 # at half-hour timestep
-  writeRaster(dailysum,paste(intermediatepath,"Rad_Rasters_d10/rad_",i,sep=""))
+  writeRaster(dailysum,paste(GISlib,"Rad_Rasters/rad_",i,sep=""))
 }
+
+# crop to smaller size to allow calculation
+TCI  <- raster(paste(GISlib,"tci.gri",sep="")) # as cropping template
+
+
+filenames <- list.files(path = paste(GISlib,"Rad_Rasters/",sep=""), 
+                        pattern = "\\.gri$",
+                        full.names=T)
+radstack <- stack(filenames,quick=T) #quick=T does not check extents, ok here since all were created with same function and template
+
+
+radstack <- crop(radstack,TCI)
+writeRaster(radstack,paste(GISlib,"CroppedRadStack",sep=""))
+

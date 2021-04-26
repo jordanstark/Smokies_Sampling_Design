@@ -9,21 +9,15 @@ library(sf)
 library(raster)
 
 # paths
-GISlib  <- "C:/Users/Jordan/Desktop/Smokies trips/March_2020_Smokies/SensorLocationPlan/"
+GISlib  <- GISlib
 
 # import data
-ETRrast <- raster(paste(GISlib,"ETRzip/ETRzip.gri",sep=""))
+ETRrast <- raster(paste(GISlib,"ETRzip.gri",sep=""))
 
 stdcrs <- crs(ETRrast)
 
-# Import and transform trails and roads (for mapping only)
-trails <- st_read(paste(GISlib,"GRSM_TRAILS/GRSM_TRAILS.shp",sep=""))
-roads  <- st_read(paste(GISlib,"GRSM_ROAD_CENTERLINES/GRSM_ROAD_CENTERLINES.shp",sep=""))
-trails <- st_transform(trails,stdcrs)
-roads  <- st_transform(roads,stdcrs)
-
 # Import and transform watershed data amd buffer
-allbuffer  <- st_read(paste(GISlib,"SampleBufferFeb2020_3/SampleBufferFeb2020_3.shp",sep=""))
+allbuffer  <- st_read(paste(GISlib,"SampleBuffer/SampleBuffer.shp",sep=""))
 watersheds <- st_read(paste(GISlib,"GRSM_WATERSHEDS/GRSM_WATERSHEDS.shp",sep=""))
 cosby      <- st_union(watersheds[watersheds$Name=="Cosby Creek",])
 
@@ -128,51 +122,4 @@ finalsites <- rbind(cosby_include1,cosby_include2,cosby_include3)
 finalsites$ETR <- factor(finalsites$ETR)
 
 st_write(finalsites,paste(GISlib,"Cosby_SampleSites",sep=""),driver="ESRI Shapefile")
-write.csv(finalsites,"E:/GIS_SensorStratification/Cosby_SampleSites.csv")
-
-
-
-#### plotting ####
-library(tmap)
-library(tmaptools)
-
-tmap_mode("view")
-
-EVI_Area    <- raster(paste(GISlib,"EVI_Summary/EVI_Summary.gri",sep=""),
-                      band=1)
-parkbound <- st_read(paste(GISlib,"GRSM_BOUNDARY_POLYGON/GRSM_BOUNDARY_POLYGON.shp",sep=""))
-
-parkbound <- st_transform(parkbound,stdcrs)
-parkbound[,2:21] <- NULL # don't need attrs just the points
-parkbound <- parkbound[parkbound$OBJECTID<18,]
-
-tm_shape(cosby,is.master=T) +
-  tm_polygons(alpha=0.1,border.col="blue") +
-tm_shape(finalsites) +
-  tm_dots(col="ETR",size=0.2) +
-tm_shape(trails) +
-  tm_lines(col="black",lty=2,id="TRAILNAME") +
-tm_shape(roads) +
-  tm_lines(col="red",id="RDLABEL") 
-
-
-tm_shape(cosby_ETR)+
-  tm_raster(style="cat",palette="Set3",stretch.palette=F)
-
-
-
-
-tm_shape(trails) +
-  tm_lines(col="black",lty=2,id="TRAILNAME") +
-tm_shape(roads) +
-  tm_lines(col="red",id="RDLABEL") +
-tm_shape(EVI_Area) +
-  tm_raster(n=5) +
-tm_shape(cosby) +
-  tm_polygons(alpha=0.4,border.col="blue") +
-tm_shape(parkbound) +
-  tm_polygons(alpha=0.05,border.col="blue")
-
-
-
-
+write.csv(finalsites,paste(out_path,"Cosby_SampleSites.csv",sep=""),row.names=F)

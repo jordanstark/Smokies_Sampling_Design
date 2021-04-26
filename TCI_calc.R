@@ -8,7 +8,7 @@ library(sp)
 library(topmodel)
 
 # data location
-DEMPath <- "E:/GIS_SensorStratification/GIS/Elevation/Elev.gri"
+DEMPath <- paste(GISlib,"Elevation/elev.gri",sep="")
 
 # import data
 DEM <- raster(DEMPath)
@@ -36,5 +36,5 @@ topidx <- topidx(matrix,res=xres(DEM))
 TCI    <- setValues(DEM,topidx$atb)
 
 
-writeRaster(TCI,"E:/GIS_SensorStratification/GIS/TCI/TCI")
-writeRaster(TCI,"E:/GIS_SensorStratification/GIS/TCI/TCI.tif")
+writeRaster(TCI,paste(GISlib,"tci",sep=""))
+writeRaster(DEM,paste(GISlib,"Elev_park",sep=""))

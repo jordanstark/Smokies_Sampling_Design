@@ -6,8 +6,8 @@
 library(sf)
 
 #data sources
-roadPath <- "E:/GIS_SensorStratification/GIS/GRSM_ROAD_CENTERLINES/GRSM_ROAD_CENTERLINES.shp"
-trailPath <- "E:/GIS_SensorStratification/GIS/GRSM_TRAILS/GRSM_TRAILS.shp"
+roadPath <- paste(GISlib,"GRSM_ROAD_CENTERLINES/GRSM_ROAD_CENTERLINES.shp",sep="")
+trailPath <- paste(GISlib,"GRSM_TRAILS/GRSM_TRAILS.shp",sep="")
 
 # import data
 roads <- st_read(roadPath)
@@ -33,4 +33,4 @@ trailbuf_max   <- st_buffer(useable_trails,dist=150)
 fullbuf <- st_difference(trailbuf_max,trailbuf_min)
 
 
-st_write(obj=fullbuf,dsn="E:/GIS_SensorStratification/GIS/SampleBufferFeb2020_3",driver="ESRI SHAPEFILE")
+st_write(obj=fullbuf,dsn=paste(GISlib,"SampleBuffer",sep=""),driver="ESRI SHAPEFILE")
